@@ -12,12 +12,16 @@ public class Main : MonoBehaviour {
     public TextScriptBase[] menuText;
     public TextScriptBase[] uiText;
     public Counter counter;
+    public AudioSource audioSource;
+    public MusicAnalyser musicAnalyser;
 
     public static StateMachine s;
 
+    private bool done = false;
+
 	void Start () 
     {
-        s = new StateMachine();
+        s = new StateMachine(State.Opening);
         StartCoroutine(Starting());
 	}
 
@@ -25,6 +29,25 @@ public class Main : MonoBehaviour {
     {
         if (s.StateChanged())
         {
+            // Check if animation is skipped
+            if (done == false)
+            {
+                print(s.lastState);
+                switch (s.lastState)
+                {
+                    case State.Opening:
+                        gameText.gameObject.SetActive(false);
+                        lightScript.ChangeIntensity(0.8f, 1);
+                        gameText.ChangeColor(new Color(1, 1, 1, 0), 1);
+                        player.ToggleMovement(true);
+                        break;
+                }
+
+                StopAllCoroutines();
+                done = true;
+            }
+
+            // Go to next state
             switch (s.CurrentState)
             {
                 case State.Menu:
@@ -43,9 +66,14 @@ public class Main : MonoBehaviour {
                     Application.Quit();
                     break;
             }
+
+            s.Update();
         }
 
         if (Input.GetKeyDown(KeyCode.Escape))
+            s.MoveNext(Command.Stop);
+
+        if (s.CurrentState == State.Opening && Input.GetKeyDown(KeyCode.Space))
             s.MoveNext(Command.Stop);
 	}
 
@@ -62,10 +90,11 @@ public class Main : MonoBehaviour {
         gameText.ChangeColor(new Color(1, 1, 1, 0), 0.02f);
 
         yield return new WaitForSeconds(1);
-        Destroy(gameText.gameObject);
+        gameText.gameObject.SetActive(false);
         player.ToggleMovement(true);
-        s.MoveNext(Command.Continue);
 
+        done = true;
+        s.MoveNext(Command.Continue);
     }
 
     private IEnumerator Menu()
@@ -112,6 +141,9 @@ public class Main : MonoBehaviour {
     {
         player.ToggleSelecting(false);
 
+        audioSource.Play();
+        musicAnalyser.Analyse();
+
         counter.ResetCounter();
         counter.StartCounter();
 
@@ -121,7 +153,7 @@ public class Main : MonoBehaviour {
         spawner.StartSpawning();
 
         cameraScript.StartRotating();
-        cameraScript.SetRotSpeed(2);
+        cameraScript.SetDefaultRotSpeed(1);
 
         yield return null;
     }
@@ -132,6 +164,8 @@ public class Main : MonoBehaviour {
 
         counter.StopCounter();
         spawner.StopSpawning();
+
+        musicAnalyser.Stop();
 
         while (cameraScript.StopRotating())
             yield return null;

@@ -4,16 +4,18 @@ using System.Collections.Generic;
 
 public class WallScript : MonoBehaviour {
 
-    public GameObject hexagon;
-
     public float _width;
     public float _distance;
-    public float _height;
-    public float _speed = 0.06f;
+    public float _speed;
     public int _side;
 
+    public float maxHeight;
+    public float heightSmoothing;
+
+    public MusicAnalyser musicAnalyser;
     public Material material;
 
+    private float _currentHeight;
     private Mesh mesh;
     private MeshFilter mf;
     private MeshRenderer mr;
@@ -53,6 +55,9 @@ public class WallScript : MonoBehaviour {
 	}
 	
 	void Update () {
+
+        _currentHeight += (musicAnalyser.RmsValue * maxHeight - _currentHeight) * 0.4f;
+
         if (wallDelegate != null)
             wallDelegate();
 	}
@@ -70,7 +75,7 @@ public class WallScript : MonoBehaviour {
         originalVertices = new List<Vector3> { new Vector3(frontDistance, 0, 0), new Vector3(rearDistance, 0, 0), angledVector * frontDistance, angledVector * rearDistance };
 
         for (int i = 0; i < 4; i++)
-            originalVertices.Add(originalVertices[i] + new Vector3(0, _height, 0));
+            originalVertices.Add(originalVertices[i] + new Vector3(0, _currentHeight, 0));
 
         vertices = new List<Vector3>();
 

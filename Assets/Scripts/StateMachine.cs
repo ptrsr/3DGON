@@ -46,16 +46,17 @@ public class StateMachine
 
     Dictionary<StateTransition, State> transitions;
     public State CurrentState { get; private set; }
-    private State lastState;
+    public State lastState { get; private set; }
 
-    public StateMachine()
+    public StateMachine(State startState)
     {
-        CurrentState = State.Opening;      //Starting state
+        CurrentState = startState;
         lastState = CurrentState;
 
         transitions = new Dictionary<StateTransition, State> 
         {
             { new StateTransition(State.Opening, Command.Continue), State.Menu },
+            { new StateTransition(State.Opening, Command.Stop), State.Menu },
             { new StateTransition(State.Menu, Command.Play), State.Playing },
             { new StateTransition(State.Menu, Command.Stop), State.terminated},
             { new StateTransition(State.Playing, Command.Stop), State.Stopping},
@@ -84,7 +85,11 @@ public class StateMachine
         if (CurrentState == lastState)
             return false;
 
-        lastState = CurrentState;
         return true;
+    }
+
+    public void Update()
+    {
+        lastState = CurrentState;
     }
 }

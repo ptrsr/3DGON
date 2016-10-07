@@ -7,7 +7,11 @@ public class WallSpawnerScript : MonoBehaviour
     public float spawnDistance = 15;
     public float spawnWidth = 3;
     public float spawnSpeed = 0.06f;
+    public float maxHeight = 10;
+    public float heightSmoothing = 0.4f;
 
+
+    public MusicAnalyser musicAnalyser;
     public GameObject wallPrefab;
 
     private delegate void SpawnerDelegate();
@@ -61,6 +65,10 @@ public class WallSpawnerScript : MonoBehaviour
                         wallScript._distance = spawnDistance - (timer - spawnWidth);
                         wallScript._width = spawnWidth;
                         wallScript._speed = spawnSpeed;
+                        wallScript.maxHeight = maxHeight;
+                        wallScript.heightSmoothing = heightSmoothing;
+
+                        wallScript.musicAnalyser = musicAnalyser;
                     }
                 }
             }

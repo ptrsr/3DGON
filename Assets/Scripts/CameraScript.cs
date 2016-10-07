@@ -4,17 +4,14 @@ using System.Linq;
 
 public class CameraScript : MonoBehaviour {
 
-   //     [SerializeField]
-   // private float distance = 8;
         [SerializeField]
     private float speed = 1;
-   //     [SerializeField]
-   // private float smoothness = 0.7f;
-   //     [SerializeField]
-   // private float maxAngle = 20;
         [SerializeField]
     private float border = 10;
+        [SerializeField]
+    private Main main;
 
+    private MusicAnalyser analyser;
     private Vector3 velocity;
 
     private delegate void CameraDelegate();
@@ -24,7 +21,12 @@ public class CameraScript : MonoBehaviour {
     private float currentRotSpeed = 0;
     private bool skippedTriangle = false;
 
-	void Update () 
+    void Start()
+    {
+        analyser = main.musicAnalyser;
+    }
+
+	void Update() 
     {
         if (cameraDelegate != null)
             cameraDelegate();
@@ -48,7 +50,7 @@ public class CameraScript : MonoBehaviour {
 
     private void Rotate()
     {
-        this.transform.eulerAngles += new Vector3(0, currentRotSpeed, 0);
+        this.transform.eulerAngles += new Vector3(0, currentRotSpeed + analyser.RmsValue * 10, 0);
     }
 
     public void StartRotating()
@@ -75,7 +77,7 @@ public class CameraScript : MonoBehaviour {
             cameraDelegate += Movement;
     }
 
-    public void SetRotSpeed(float speed)
+    public void SetDefaultRotSpeed(float speed)
     {
         currentRotSpeed = speed;
     }
